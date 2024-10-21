@@ -1,15 +1,12 @@
+from selenium.common import WebDriverException
+from selenium.webdriver import Chrome
+
 from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.chrome.options import Options
 
 
 class WebDriverManager:
     """Класс для управления WebDriver и получения HTML-кода страницы."""
-
-    def __init__(self, driver: WebDriver):
-        """
-        Args:
-            driver (WebDriver): Экземпляр WebDriver для управления браузером.
-        """
-        self.driver: WebDriver = driver
 
     async def fetch_page_source(self, url: str) -> str:
         """Получает исходный код страницы по указанному URL.
@@ -20,6 +17,31 @@ class WebDriverManager:
         Returns:
             str: Исходный HTML-код страницы.
         """
-        self.driver.get(url)
-        return self.driver.page_source
 
+        chrome_options = await self._get_options()
+        driver: WebDriver = Chrome(options=chrome_options)
+
+        try:
+            driver.get(url)
+        except WebDriverException:
+            print("ChromeDriver disconnected. Restarting...")
+            driver.quit()
+            driver = Chrome(options=chrome_options)
+            driver.get(url)
+
+        return driver.page_source
+
+    async def _get_options(self):
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--window-size=1920x1080")
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument('--remote-debugging-port=9222')
+        chrome_options.add_argument('--disable-gpu')  # Disables GPU hardware acceleration
+        chrome_options.add_argument('--disable-software-rasterizer')  # Disables 3D software rasterizer
+        chrome_options.add_argument('--disable-crash-reporter')  # Disables the crash reporter
+        chrome_options.add_argument('--disable-extensions')
+
+        return chrome_options

@@ -14,7 +14,7 @@ class ProjectRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add_new_project(self, url: str) -> None:
+    async def add_new_project(self, url: str = None) -> None:
         """Добавляет новый проект в базу данных
 
         Args:

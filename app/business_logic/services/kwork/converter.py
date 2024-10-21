@@ -39,9 +39,8 @@ class KworkConverter:
             title = title_tag.text if title_tag else ''
             url = 'https://kwork.ru' + title_tag.find('a').get('href') if title_tag else ''
             description = project.find('div', attrs={'class': 'wants-card__description-text'}).text or ''
-            price = project.find('div', attrs={'class': 'wants-card__price'}).text or ''
-        except AttributeError as error:
-            logger.error(error)
+            price = project.find('div', attrs={'class': 'wants-card__description-higher-price'}).text or ''
+        except AttributeError:
             return {}
         return {
             'title': title,

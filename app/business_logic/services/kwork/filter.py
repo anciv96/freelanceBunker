@@ -1,3 +1,5 @@
+import re
+
 from app.business_logic.repository.kwork_repository import ProjectRepository
 
 
@@ -16,9 +18,21 @@ class Filter:
         """
         new_list = []
         for project in projects:
-            url = project['url']
-            if not await self.repository.project_exists(url):
+            url = project.get('url')
+            if not await self.repository.project_exists(url) and url:
                 new_list.append(project)
                 await self.repository.add_new_project(url)
 
+        return new_list
+
+    async def filter_low_cost_project(self, projects: list[dict[str, str]]):
+        new_list = []
+        for project in projects:
+            text = project.get('price', '0')
+            match = re.search(r'\d{1,3}(?:\s\d{3})*', text)
+
+            if match:
+                number = int(match.group(0).replace(' ', ''))
+                if number >= 15_000:
+                    new_list.append(project)
         return new_list
